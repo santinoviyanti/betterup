@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}BetterUp - Deteksi Dini Kesehatan Mental{% endblock %}
+
+{% block content %}
+<section class="detection-container">
+    <div class="container">
+        <div class="detection-card">
+            <!-- Header Section -->
+            <div class="section-header">
+                <h2>Asesmen Mandiri Kesehatan Mental</h2>
+                <p>Jawablah 27 pertanyaan berikut dengan jujur sesuai kondisi yang Anda alami belakangan ini.</p>
+            </div>
+
+            <!-- Box Notifikasi Peringatan (Jika ada yang belum diisi) -->
+            <div id="alertBox" class="alert-box">
+                ⚠️ Masih ada pertanyaan yang belum dijawab! Mohon lengkapi semua pertanyaan sebelum melanjutkan.
+            </div>
+
+            <!-- Form Diagnosa -->
+            <form id="detectionForm" action="{% url 'submit_quiz' %}" method="POST" novalidate>
+                {% csrf_token %}
+
+                {% for q in questions %}
+                    <div class="question-card" id="card_{{ q.code }}">
+                        <!-- Nomor Pertanyaan -->
+                        <div class="question-number">{{ forloop.counter }}</div>
+
+                        <!-- Isi Pertanyaan & Input Jawaban -->
+                        <div class="question-body">
+                            <div class="question-text">{{ q.text }}</div>
+
+                            {% if q.type == 'select' %}
+                                <!-- Dropdown Usia -->
+                                <div class="custom-dropdown" id="dropdown_{{ q.code }}">
+                                    <div class="dropdown-selected">-- Pilih Rentang Usia --</div>
+                                    <div class="dropdown-options">
+                                        {% for val, label in q.options %}
+                                            <div class="dropdown-item" data-value="{{ val }}">{{ label }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Hidden Input: Nilai ini yang akan terkirim ke database Django -->
+                                    <input type="hidden" name="{{ q.code }}" class="dropdown-hidden-value" required>
+                                </div>
+                            {% else %}
+                                <!-- Radio Button Ya / Tidak -->
+                                <div class="options-group">
+                                    <label class="option-label yes" for="{{ q.code }}_1">
+                                        <input type="radio" name="{{ q.code }}" value="1" id="{{ q.code }}_1" required> Ya
+                                    </label>
+                                    <label class="option-label no" for="{{ q.code }}_0">
+                                        <input type="radio" name="{{ q.code }}" value="0" id="{{ q.code }}_0" required> Tidak
+                                    </label>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Tombol Submit -->
+                <div class="submit-container">
+                    <button type="submit" class="btn-submit">
+                        Proses Deteksi Dini
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Script Validasi Form & Interaksi Custom Dropdown -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // A. LOGIKA INTERAKSI DROPDOWN KUSTOM
+        const dropdowns = document.querySelectorAll('.custom-dropdown');
+
+        dropdowns.forEach(dropdown => {
+            const selected = dropdown.querySelector('.dropdown-selected');
+            const options = dropdown.querySelectorAll('.dropdown-item');
+            const hiddenInput = dropdown.querySelector('.dropdown-hidden-value');
+            const parentCard = dropdown.closest('.question-card');
+
+            // Buka / tutup dropdown saat kotak diklik
+            selected.addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdowns.forEach(d => {
+                    if (d !== dropdown) d.classList.remove('active');
+                });
+                dropdown.classList.toggle('active');
+            });
+
+            // Jalankan saat item opsi diklik
+            options.forEach(option => {
+                option.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Update tampilan teks & nilai hidden input untuk Django
+                    selected.textContent = this.textContent;
+                    hiddenInput.value = this.getAttribute('data-value');
+
+                    // Set status visual pilihan aktif
+                    options.forEach(opt => opt.classList.remove('is-selected'));
+                    this.classList.add('is-selected');
+
+                    // Tutup menu dropdown
+                    dropdown.classList.remove('active');
+
+                    // Hapus highlight merah error jika ada
+                    if (parentCard) {
+                        parentCard.classList.remove('error-highlight');
+                    }
+                });
+            });
+        });
+
+        // Tutup semua dropdown jika mengklik area kosong di luar dropdown
+        document.addEventListener('click', function() {
+            dropdowns.forEach(d => d.classList.remove('active'));
+        });
+
+        // B. LOGIKA VALIDASI SUBMIT & CEK LOGIN
+        document.getElementById('detectionForm').addEventListener('submit', function(event) {
+            const isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+            
+            if (!isAuthenticated) {
+                event.preventDefault();
+                alert('Silakan login terlebih dahulu untuk menyimpan hasil deteksi Anda.');
+                window.location.href = "{% url 'login' %}?next={% url 'deteksi' %}";
+                return;
+            }
+
+            let isValid = true;
+            let firstUnansweredCard = null;
+            const alertBox = document.getElementById('alertBox');
+
+            // Reset status error
+            document.querySelectorAll('.question-card').forEach(card => {
+                card.classList.remove('error-highlight');
+            });
+
+            {% for q in questions %}
+                (function() {
+                    const qCode = "{{ q.code }}";
+                    const card = document.getElementById('card_' + qCode);
+
+                    {% if q.type == 'select' %}
+                        const hiddenInput = card.querySelector('.dropdown-hidden-value');
+                        if (!hiddenInput || !hiddenInput.value) {
+                            isValid = false;
+                            card.classList.add('error-highlight');
+                            if (!firstUnansweredCard) firstUnansweredCard = card;
+                        }
+                    {% else %}
+                        const radioChecked = card.querySelector('input[type="radio"]:checked');
+                        if (!radioChecked) {
+                            isValid = false;
+                            card.classList.add('error-highlight');
+                            if (!firstUnansweredCard) firstUnansweredCard = card;
+                        }
+                    {% endif %}
+                })();
+            {% endfor %}
+
+            if (!isValid) {
+                event.preventDefault();
+                alertBox.style.display = 'block';
+
+                if (firstUnansweredCard) {
+                    firstUnansweredCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                alertBox.style.display = 'none';
+            }
+        });
+
+        // Hapus highlight error pada radio button saat diklik
+        document.querySelectorAll('input[type="radio"]').forEach(element => {
+            element.addEventListener('change', function() {
+                const parentCard = this.closest('.question-card');
+                if (parentCard) {
+                    parentCard.classList.remove('error-highlight');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

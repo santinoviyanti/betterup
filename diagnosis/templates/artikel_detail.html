@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ artikel.judul }} - BetterUp{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <!-- Breadcrumb & Navigasi Kembali -->
+    <div class="mb-4">
+        <a href="{% url 'artikel' %}" class="text-decoration-none text-muted fw-semibold">
+            <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Artikel
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <!-- Article Header -->
+            <article class="article-detail-card card shadow-sm border-0 overflow-hidden">
+                {% if artikel.gambar %}
+                    <img src="{{ artikel.gambar.url }}" class="card-img-top article-cover-img" alt="{{ artikel.judul }}">
+                {% endif %}
+
+                <div class="card-body p-4 p-md-5">
+                    <!-- Category & Meta Info -->
+                    <div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+                        {% if artikel.kategori %}
+                            <span class="badge badge-disorder px-3 py-2 rounded-pill">
+                                {{ artikel.kategori }}
+                            </span>
+                        {% endif %}
+                        <small class="text-muted d-flex align-items-center gap-1">
+                            <i class="bi bi-calendar3"></i> {{ artikel.tanggal_dibuat|date:"d F Y" }}
+                        </small>
+                    </div>
+
+                    <!-- Judul Artikel -->
+                    <h1 class="fw-bold mb-4" style="color: var(--dark-green); line-height: 1.3;">
+                        {{ artikel.judul }}
+                    </h1>
+
+                    <!-- Ringkasan / Lead Text -->
+                    {% if artikel.ringkasan %}
+                        <div class="article-summary p-3 mb-4 rounded-3" style="background-color: var(--soft-green); border-left: 4px solid var(--primary-green);">
+                            <p class="mb-0 fw-medium" style="color: var(--dark-green); font-style: italic;">
+                                "{{ artikel.ringkasan }}"
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <hr class="my-4 opacity-10">
+
+                    <!-- Konten Artikel -->
+                    <div class="article-content" style="color: var(--text-main); line-height: 1.8; font-size: 1.05rem;">
+                        {{ artikel.konten|safe|linebreaks }}
+                    </div>
+
+                    <!-- Article Footer / Share CTA -->
+                    <div class="mt-5 pt-4 border-top d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <a href="{% url 'artikel' %}" class="btn-pink">
+                            <i class="bi bi-journal-text me-1"></i> Lihat Artikel Lainnya
+                        </a>
+                        <a href="{% url 'deteksi' %}" class="btn-pink">
+                            <i class="bi bi-heart-pulse me-1"></i> Coba Deteksi Dini
+                        </a>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+{% endblock %}

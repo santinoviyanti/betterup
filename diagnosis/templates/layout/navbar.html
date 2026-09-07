@@ -1,0 +1,60 @@
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="container nav-container">
+        <a href="{% url 'home' %}" class="logo">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <div class="logo-text">Better<span>Up</span></div>
+        </a>
+
+        <!-- Tombol Hamburger (Hanya tampil di HP) -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <!-- Daftar Menu Navbar -->
+        <ul class="nav-links" id="navLinks">
+            <li><a href="{% url 'home' %}">Beranda</a></li>
+            <li><a href="{% url 'deteksi' %}">Deteksi Dini</a></li>
+            <li><a href="{% url 'riwayat' %}">Riwayat</a></li>
+            <li><a href="{% url 'artikel' %}">Artikel</a></li>
+
+            {% if user.is_authenticated %}
+                <li class="profile-dropdown">
+                    <button class="btn-header profile-btn">
+                        <i class="fa-regular fa-user"></i> {{ user.username }} <i class="fa-solid fa-chevron-down caret"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'logout' %}" class="dropdown-item logout-item">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </a>
+                    </div>
+                </li>
+            {% else %}
+                <li>
+                    <a href="{% url 'login' %}" class="btn-header">Login</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menuToggle');
+        const navLinks = document.getElementById('navLinks');
+        const icon = menuToggle.querySelector('i');
+
+        menuToggle.addEventListener('click', function() {
+            navLinks.classList.toggle('active');
+            
+            // Mengubah ikon dari garis 3 menjadi ikon silang (X) ketika dibuka
+            if (navLinks.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-xmark');
+            } else {
+                icon.classList.remove('fa-xmark');
+                icon.classList.add('fa-bars');
+            }
+        });
+    });
+</script>

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}BetterUp - Riwayat & Hasil Pemeriksaan{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--dark-green);">Riwayat & Hasil Pemeriksaan</h2>
+            <p class="text-muted mb-0">Pantau perkembangan dan hasil deteksi dini kesehatan mental Anda.</p>
+        </div>
+            <a href="{% url 'deteksi' %}" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px;">
+                <i class="bi bi-plus-circle"></i> Tes Baru
+            </a>
+    </div>
+
+    {% if latest_test %}
+        <!-- Highlight Hasil Tes Terbaru -->
+        <div class="card card-history mb-5">
+            <div class="card-header history-header-gradient text-white p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="badge badge-latest px-3 py-2 rounded-pill fw-bold">Hasil Pemeriksaan Terbaru</span>
+                    <small class="opacity-75"><i class="bi bi-calendar3 me-1"></i> {{ latest_test.created_at|date:"d F Y, H:i" }} WIB</small>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row align-items-center">
+                    <div class="col-12">
+                        <h6 class="text-uppercase fw-bold mb-2" style="color: var(--primary-pink);">Indikasi Utama</h6>
+                        <h3 class="fw-bold display-6 mb-3" style="color: var(--dark-pink);">{{ latest_test.predicted_disorder }}</h3>
+                        <p class="mb-0" style="color: var(--text-main);">
+                            <strong>Kelompok Usia:</strong> {{ latest_test.get_age_group_display|default:latest_test.age_group_label }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabel Riwayat Pemeriksaan Sebelumnya -->
+        <div class="card card-history">
+            <div class="card-body p-4">
+                <h4 class="fw-bold mb-3" style="color: var(--dark-green);">Riwayat Pemeriksaan Sebelumnya ({{ previous_tests|length }})</h4>
+                
+                {% if previous_tests %}
+                    <div class="table-responsive">
+                        <table class="table-history">
+                            <thead>
+                                <tr>
+                                    <th scope="col">No</th>
+                                    <th scope="col">Tanggal & Waktu</th>
+                                    <th scope="col">Kelompok Usia</th>
+                                    <th scope="col">Hasil Indikasi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for test in previous_tests %}
+                                    <tr>
+                                        <td class="fw-bold" style="color: var(--text-muted);">{{ forloop.counter }}</td>
+                                        <td>{{ test.created_at|date:"d M Y, H:i" }}</td>
+                                            <td>
+                                                {{ test.age_group_label }}
+                                            </td>
+                                        <td>
+                                            <span class="badge badge-disorder px-3 py-2 rounded-pill">
+                                                {{ test.predicted_disorder }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <p class="mb-0">Belum ada riwayat pemeriksaan terdahulu.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    {% else %}
+        <!-- State Kosong -->
+        <div class="card card-history p-5 text-center">
+            <div class="card-body">
+                <div class="mb-3">
+                    <i class="bi bi-journal-x display-1 opacity-50" style="color: var(--primary-pink);"></i>
+                </div>
+                <h4 class="fw-bold" style="color: var(--dark-green);">Belum Ada Riwayat Tes</h4>
+                <p class="text-muted mx-auto mb-4" style="max-width: 450px;">
+                    Anda belum pernah melakukan deteksi dini kesehatan mental. Silakan lakukan tes pertama Anda untuk mengetahui kondisi terkini.
+                </p>
+                <a href="{% url 'deteksi' %}" class="btn-primary" style="display: inline-block;">
+                    Mulai Tes Sekarang
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}

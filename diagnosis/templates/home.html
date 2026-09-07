@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetterUp - Platform Kesehatan Mental & Deteksi Dini</title>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Load Static Tag untuk Django -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+
+    <!-- Panggil Komponen Navbar Django dari folder layout -->
+    {% include 'layout/navbar.html' %}
+
+    <!-- HERO / CTA SECTION -->
+    <header id="beranda" class="hero">
+        <div class="container hero-grid">
+            <div class="hero-text">
+                <span class="badge"><i class="fa-solid fa-sparkles"></i> Lindungi Kesehatan Mentalmu</span>
+                <h1 class="hero-title">Temukan Keseimbangan Hidup yang <span>Lebih Baik</span></h1>
+                <p class="hero-desc">Lakukan tes awal secara mandiri untuk memahami kondisi emosional Anda. Dapatkan rekomendasi dan pemantauan riwayat kesehatan mental secara berkala.</p>
+                <div class="hero-buttons">
+                    <a href="{% url 'deteksi' %}" class="btn-primary">Mulai Asesmen Deteksi Dini</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://img.freepik.com/premium-vector/psychologist-doctor-online-consultation-psychotherapy-practice-help-consulting-patient_460582-489.jpg?w=740" alt="Ilustrasi Kesehatan Mental BetterUp">
+            </div>
+        </div>
+    </header>
+
+    <!-- LAYANAN SISTEM PAKAR DECISION TREE -->
+    <section id="layanan" class="services-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Tentang Sistem Pakar Deteksi Dini</h2>
+                <p>Memahami bagaimana algoritma Decision Tree membantu mengklasifikasikan kondisi emosional Anda secara terstruktur.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="icon-wrapper icon-pink">
+                        <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <h3>Pertanyaan Percabangan</h3>
+                    <p>Setiap jawaban Anda menentukan cabang node berikutnya untuk mempersempit kemungkinan indikasi gangguan.</p>
+                </div>
+                <div class="service-card">
+                    <div class="icon-wrapper icon-green">
+                        <i class="fa-solid fa-filter"></i>
+                    </div>
+                    <h3>Klasifikasi Gejala</h3>
+                    <p>Algoritma memilah dan memprediksi jenis gangguan mental (Stres, Anxiety, Depresi) berdasarkan jalur aturan yang dilalui.</p>
+                </div>
+                <div class="service-card">
+                    <div class="icon-wrapper icon-pink">
+                        <i class="fa-solid fa-square-poll-vertical"></i>
+                    </div>
+                    <h3>Hasil Diagnosa & Solusi</h3>
+                    <p>Di ujung cabang (leaf node), sistem menghasilkan kesimpulan kondisi emosional beserta rekomendasi solusinya.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ARTIKEL -->
+    <section id="artikel" class="articles-section home-articles-bg">
+        <div class="container">
+            <div class="section-header">
+                <h2>Tips dan Artikel</h2>
+                <p>Baca panduan praktis dan wawasan seputar dunia psikologi untuk menjaga kesehatan mental.</p>
+            </div>
+            
+            <!-- Wrapper Slider dengan Tombol Samping -->
+            <div class="articles-slider-wrapper">
+                <!-- Tombol Kiri -->
+                <button class="slider-btn prev-btn" id="prevBtn" aria-label="Sebelumnya">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+
+                <!-- Track Artikel -->
+                <div class="articles-slider-track" id="sliderTrack">
+                    {% for article in articles %}
+                        <article class="article-card">
+                            {% if article.gambar %}
+                                <img src="{{ article.gambar.url }}" alt="{{ article.judul }}" class="article-img">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=600&auto=format&fit=crop" alt="{{ article.judul }}" class="article-img">
+                            {% endif %}
+                            
+                            <div class="article-content">
+                                <span class="article-tag">{{ article.kategori }}</span>
+                                <h3>{{ article.judul|truncatechars:55 }}</h3>
+                                <p>{{ article.ringkasan|default:article.konten|striptags|truncatechars:90 }}</p>
+                                <a href="{% url 'detail_artikel' article.id %}" class="btn-secondary-card">Baca Selengkapnya</a>
+                            </div>
+                        </article>
+                    {% empty %}
+                        <div class="empty-state">
+                            <p>Belum ada artikel yang diterbitkan.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Tombol Kanan -->
+                <button class="slider-btn next-btn" id="nextBtn" aria-label="Selanjutnya">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOTLINE BANTUAN -->
+    <section id="hotline" class="hotline-section">
+        <div class="container">
+            <div class="hotline-box">
+                <div class="hotline-text">
+                    <h2>Butuh Teman Cerita atau Bantuan Darurat?</h2>
+                    <p>Jangan menanggungnya sendirian. Layanan Hotline siap mendengarkan 24/7.</p>
+                </div>
+                <a href="#" class="btn-call">
+                    <i class="fa-solid fa-phone-flip"></i> Panggilan Hotline
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Panggil Komponen Footer Django dari folder layout -->
+    {% include 'layout/footer.html' %}
+
+    <!-- JavaScript Slider -->
+    <script>
+    const track = document.querySelector('.articles-slider-track');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+
+    if (track && prevBtn && nextBtn) {
+        // Fungsi Geser Kanan
+        nextBtn.addEventListener('click', () => {
+        const cardWidth = track.querySelector('.article-card').offsetWidth + 24; // Lebar kartu + gap
+        track.scrollBy({ left: cardWidth, behavior: 'smooth' });
+        });
+
+        // Fungsi Geser Kiri
+        prevBtn.addEventListener('click', () => {
+        const cardWidth = track.querySelector('.article-card').offsetWidth + 24;
+        track.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+        });
+    }
+    </script>
+
+</body>
+</html>
